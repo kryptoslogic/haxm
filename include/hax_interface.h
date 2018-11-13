@@ -288,4 +288,21 @@ struct hax_debug_t {
     uint64_t dr[8];
 } PACKED;
 
+struct hax_cpuid_entry_t {
+    uint32_t leaf;
+    uint32_t subleaf;
+    uint32_t flags;
+    uint32_t eax;
+    uint32_t ebx;
+    uint32_t ecx;
+    uint32_t edx;
+    uint32_t reserved[3];
+} PACKED;
+
+struct hax_cpuid_t {
+    uint32_t nent;
+    uint32_t reserved;
+    struct hax_cpuid_entry_t entries[0];
+} PACKED;
+
 #endif  // HAX_INTERFACE_H_
