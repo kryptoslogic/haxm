@@ -1,4 +1,8 @@
 language: c
+addons:
+  artifacts:
+    working_dir:
+      - $TRAVIS_BUILD_DIR/artifacts
 
 matrix:
   include:
@@ -12,12 +16,16 @@ matrix:
       script:
         - cd platforms/darwin
         - xcodebuild -configuration Debug -sdk macosx10.14
+      after_success:
+        - export ARTIFACTS_SUBFOLDER=$TRAVIS_BUILD_DIR/artifacts/$TRAVIS_JOB_NAME
+        - mkdir -p $ARTIFACTS_SUBFOLDER
+        - cp -R ./build/Debug $ARTIFACTS_SUBFOLDER
 
     - name: "haxm-linux"
       os: linux
       dist: trusty
       sudo: false
-      before_install:
+      install:
         - sudo apt-get update
         - sudo apt-get install -y linux-headers-`uname -r`
         - wget http://mirrors.kernel.org/ubuntu/pool/universe/n/nasm/nasm_2.13.02-0.1_amd64.deb
@@ -26,7 +34,12 @@ matrix:
       script:
         - cd platforms/linux
         - make -j$(nproc)
+      after_success:
+        - export ARTIFACTS_SUBFOLDER=$TRAVIS_BUILD_DIR/artifacts/$TRAVIS_JOB_NAME
+        - mkdir -p $ARTIFACTS_SUBFOLDER
+        - cp haxm.ko $ARTIFACTS_SUBFOLDER
 
+  exclude:
     - name: "haxm-windows"
       os: windows
       install:
@@ -49,3 +62,7 @@ matrix:
         - MSBuild.exe haxm.sln $PROPS //p:Configuration="Debug" //p:Platform="Win32"
         - MSBuild.exe haxm.sln $PROPS //p:Configuration="Debug" //p:Platform="x64"
         - build/tests/x64/Debug/haxm-tests.exe
+      after_success:
+        - export ARTIFACTS_SUBFOLDER=$TRAVIS_BUILD_DIR/artifacts/$TRAVIS_JOB_NAME
+        - mkdir -p $ARTIFACTS_SUBFOLDER
+        - cp -R ./build/out $ARTIFACTS_SUBFOLDER
